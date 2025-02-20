@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { useHistory } from "react-router-dom";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const history = useHistory();
 
   const submit = (event) => {
     event.preventDefault();
@@ -18,13 +22,24 @@ export default function LoginPage() {
 
     fetch("http://127.0.0.1:5000/user/auth", payload)
       .then((res) => res.json())
-      .then((data) => console.log(data))
-      .catch((err) => console.error("Login error:", err));
+      .then((data) => {
+        console.log(data);
+        if (!data.ok) {
+          setError(data);
+        } else {
+          history.push("/home");
+        }
+      })
+      .catch((err) => {
+        console.error("Login error:", err);
+      });
   };
 
   return (
     <div className="login-wrapper">
       <h1>Login</h1>
+
+      <p>{error}</p>
 
       <form onSubmit={submit}>
         <label htmlFor="email">Email</label>
@@ -33,6 +48,7 @@ export default function LoginPage() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onFocus={() => setError("")}
           required
         />
 
@@ -42,6 +58,7 @@ export default function LoginPage() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onFocus={() => setError("")}
           required
         />
 
